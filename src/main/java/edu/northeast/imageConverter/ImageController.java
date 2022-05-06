@@ -43,10 +43,26 @@ public class ImageController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // label displays wrapped text
         lblInfo.setWrapText(true);
+
+        // add options to type conversion select box
+        initChoiceBox();
+
+        // default No Image picture
         Image image = new Image(Objects.requireNonNull(
             getClass().getClassLoader().getResourceAsStream("NoImageAvailable.jpeg")));
         setImage(image, url.getPath());
+    }
+
+    private void initChoiceBox() {
+        cboxType.getItems().add("SVG");
+        cboxType.getItems().add("ICO");
+        cboxType.getItems().add("JPG");
+        cboxType.getItems().add("JPEG");
+        cboxType.getItems().add("GIP");
+        cboxType.getItems().add("BMP");
+        cboxType.getItems().add("PNG");
     }
 
     private void setImage(Image image, String path) {
@@ -89,5 +105,9 @@ public class ImageController implements Initializable {
                 fileNotFoundException.printStackTrace();
             }
         }
+    }
+
+    public void onConvert(ActionEvent actionEvent) {
+
     }
 }
