@@ -1,0 +1,12 @@
+.label-section {
+    -fx-background-color: #84D68B;
+    -fx-text-fill: #EFFFF5;
+    -fx-alignment:left;
+    -fx-font: bold Normal 13pt "Arial";
+}
+
+.image-view-wrapper:border {
+    -fx-border-color: black;
+    -fx-border-style: solid;
+    -fx-border-width: 5;
+}
