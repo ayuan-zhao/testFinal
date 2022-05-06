@@ -11,6 +11,8 @@ import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -41,6 +43,9 @@ public class ImageController implements Initializable {
 
     final FileChooser fileChooser = new FileChooser();
 
+    private Image uploadedImg;
+    private boolean hasPicture = false;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // label displays wrapped text
@@ -50,9 +55,9 @@ public class ImageController implements Initializable {
         initChoiceBox();
 
         // default No Image picture
-        Image image = new Image(Objects.requireNonNull(
+        uploadedImg = new Image(Objects.requireNonNull(
             getClass().getClassLoader().getResourceAsStream("NoImageAvailable.jpeg")));
-        setImage(image, url.getPath());
+        setImage(uploadedImg, url.getPath());
     }
 
     private void initChoiceBox() {
@@ -99,8 +104,9 @@ public class ImageController implements Initializable {
             final InputStream targetStream;
             try {
                 targetStream = new DataInputStream(new FileInputStream(selectedFile));
-                Image image = new Image(targetStream);
-                setImage(image, selectedFile.getPath());
+                uploadedImg = new Image(targetStream);
+                setImage(uploadedImg, selectedFile.getPath());
+                hasPicture = true;
             } catch(FileNotFoundException fileNotFoundException) {
                 fileNotFoundException.printStackTrace();
             }
@@ -108,6 +114,24 @@ public class ImageController implements Initializable {
     }
 
     public void onConvert(ActionEvent actionEvent) {
+        System.out.println("test");
+        if (cboxType.getSelectionModel().getSelectedItem() == null) {
+            // create a alert
+            alertError("Please select one type to convert");
+            return;
+        }
 
+        if (!hasPicture) {
+            alertError("Please upload picture first");
+            return;
+        }
+
+
+    }
+
+    private void alertError(String msg) {
+        Alert a = new Alert(AlertType.ERROR);
+        a.setContentText(msg);
+        a.show();
     }
 }
