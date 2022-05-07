@@ -1,21 +1,19 @@
 package edu.northeast.imageConverter;
 
-import java.awt.Color;
+import static edu.northeast.imageConverter.FixedImage.MAX_DISPLAY_HEIGHT;
+import static edu.northeast.imageConverter.FixedImage.MAX_DISPLAY_WIDTH;
+import static edu.northeast.imageConverter.FixedImage.NO_IMAGE_AVAILABLE;
+
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -27,6 +25,7 @@ import javax.imageio.ImageIO;
 
 public class ImageController implements Initializable {
 
+    private static final String NEW_LINE = "\n";
     @FXML
     private ImageView imgView1;
 
@@ -47,8 +46,10 @@ public class ImageController implements Initializable {
 
     final FileChooser fileChooser = new FileChooser();
 
-    private Image uploadedImg;
-    BufferedImage bufferedImage;
+    private FixedImage uploadedImg;
+
+    // MessageManager instance for alert.
+    MessageManager mm = MessageManager.getInstance();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -59,9 +60,9 @@ public class ImageController implements Initializable {
         initChoiceBox();
 
         // default No Image picture
-        uploadedImg = new Image(Objects.requireNonNull(
-            getClass().getClassLoader().getResourceAsStream("NoImageAvailable.jpeg")));
-        setImage(uploadedImg, url.getPath());
+        uploadedImg = new FixedImage(
+            getClass().getClassLoader().getResourceAsStream(NO_IMAGE_AVAILABLE), NO_IMAGE_AVAILABLE, null);
+        displayImage(url.getPath());
     }
 
     private void initChoiceBox() {
@@ -71,99 +72,98 @@ public class ImageController implements Initializable {
         cboxType.getItems().add("PNG");
     }
 
-    private void setImage(Image image, String path) {
-        imgView1.setImage(image);
-        fixImageDisplay(imgView2, image);
-        imgView2.setImage(image);
+    /**
+     * Display Images
+     */
+    private void displayImage(String path) {
+        imgView1.setImage(uploadedImg);
 
+        // If the picture is too large (width is larger than MAX_DISPLAY_WIDTH, height is larger than
+        // MAX_DISPLAY_HEIGHT). We need to fix the display.
+        fixImageDisplay(uploadedImg);
+        imgView2.setImage(uploadedImg);
+
+        if (uploadedImg.hasPicture()) {
+            displayMsg(String.format("Dimensions : %s x %s", uploadedImg.getWidth(), uploadedImg.getHeight()),
+                false);
+            displayMsg(String.format("Path : %s\n", path), true);
+        }
+    }
+
+    /**
+     * Display messages in label.
+     */
+    private void displayMsg(String msg, boolean append) {
         StringBuilder sb = new StringBuilder();
-        String dimensions = String.format("Dimensions : %s x %s\n", image.getWidth(), image.getHeight());
-        sb.append(dimensions);
-        String pathInfo = String.format("Path : %s\n", path);
-        sb.append(pathInfo);
+        if (append) {
+            sb.append(lblInfo.getText());
+        }
+        sb.append(msg).append(NEW_LINE);
         lblInfo.setText(sb.toString());
     }
 
 
-    private void fixImageDisplay(ImageView imgView2, Image image) {
-        if (image.getWidth() > 900) {
-            imgView2.setFitWidth(900);
+    /**
+     * If the picture is too large (width is larger than MAX_DISPLAY_WIDTH, height is larger than
+     * MAX_DISPLAY_HEIGHT). We need to fix the display.
+     */
+    private void fixImageDisplay(Image image) {
+        if (image.getWidth() > MAX_DISPLAY_WIDTH) {
+            imgView2.setFitWidth(MAX_DISPLAY_WIDTH);
             imgView2.setPreserveRatio(true);
         }
-        if (image.getHeight() > 600) {
-            imgView2.setFitHeight(500);
+        if (image.getHeight() > MAX_DISPLAY_HEIGHT) {
+            imgView2.setFitHeight(MAX_DISPLAY_HEIGHT);
             imgView2.setPreserveRatio(true);
         }
     }
 
+    /**
+     * upload one picture to UI. Triggered when upload button clicked.
+     */
     public void onUpload(ActionEvent actionEvent) {
         System.out.println("btnUpload");
 
         File selectedFile = fileChooser.showOpenDialog(new Stage());
         if (selectedFile != null) {
-
             try {
-                bufferedImage = ImageIO.read(selectedFile);
-            } catch(IOException e) {
-                e.printStackTrace();
-            }
-
-            final InputStream targetStream;
-            try {
-                targetStream = new DataInputStream(new FileInputStream(selectedFile));
-                uploadedImg = new Image(targetStream);
-                setImage(uploadedImg, selectedFile.getPath());
-            } catch(FileNotFoundException fileNotFoundException) {
+                BufferedImage bufferedImage = ImageIO.read(selectedFile);
+                uploadedImg = new FixedImage(new DataInputStream(new FileInputStream(selectedFile)),
+                    selectedFile.getPath(), bufferedImage);
+                displayImage(selectedFile.getPath());
+            } catch(IOException fileNotFoundException) {
+                // Using catch block to handle file selection error.
+                mm.alertError(fileNotFoundException.getMessage());
                 fileNotFoundException.printStackTrace();
             }
         }
     }
 
+    /**
+     * Trigged when "convert and download" button click.
+     */
     public void onConvert(ActionEvent actionEvent) {
-        System.out.println("test");
-        if (cboxType.getSelectionModel().getSelectedItem() == null) {
+        if (!uploadedImg.hasPicture()) {
+            mm.alertError("Please upload picture first");
+            return;
+        }
+
+        Object selectedItem = cboxType.getSelectionModel().getSelectedItem();
+        if (selectedItem == null) {
             // create a alert
-            alertError("Please select one type to convert");
+            mm.alertError("Please select one type to convert");
             return;
         }
 
-        if (bufferedImage == null) {
-            alertError("Please upload picture first");
-            return;
-        }
+        String newExt = selectedItem.toString();
 
-        String extension = cboxType.getSelectionModel().getSelectedItem().toString();
-
-        final BufferedImage imageToWrite =
-            new BufferedImage(
-                bufferedImage.getWidth(),
-                bufferedImage.getHeight(),
-                BufferedImage.TYPE_INT_RGB);
-        imageToWrite.createGraphics().drawImage(bufferedImage, 0, 0, Color.WHITE, null);
-        File fileOld = fileChooser.showSaveDialog(new Stage());
-
-        if (fileOld != null) {
-            try {
-                File file = new File(fileOld.getPath() + "." + extension);
-                ImageIO.write(imageToWrite, extension, file);
-                alertInfo("File is downloaded successfully!");
-            } catch(IOException ex) {
-                System.out.println(ex.getMessage());
-                ex.printStackTrace();
-                alertError(ex.getMessage());
-            }
+        // create a new converter and convert between types.
+        ImageConvertor converter = new ImageConvertor(uploadedImg, newExt);
+        converter.convert();
+        if (converter.saveImage()) {
+            displayMsg("File is saved in " + converter.getFileSavedPath(), true);
         }
     }
 
-    private void alertError(String msg) {
-        Alert a = new Alert(AlertType.ERROR);
-        a.setContentText(msg);
-        a.show();
-    }
 
-    private void alertInfo(String msg) {
-        Alert a = new Alert(AlertType.INFORMATION);
-        a.setContentText(msg);
-        a.show();
-    }
 }
