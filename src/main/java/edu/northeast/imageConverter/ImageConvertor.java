@@ -27,7 +27,7 @@ public class ImageConvertor implements IConvertor {
 
     @Override
     public void convert() {
-        if (this.originalExtension.equals(this.newExtension)) {
+        if (this.originalExtension.equalsIgnoreCase(this.newExtension)) {
             mm.alertInfo("Please select different picture Type. Both type is " + this.originalExtension);
             return;
         }
