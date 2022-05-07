@@ -10,6 +10,7 @@ module edu.northeast.imageConverter {
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
     requires org.apache.commons.lang3;
+    requires java.desktop;
 
     opens edu.northeast.imageConverter to javafx.fxml;
     exports edu.northeast.imageConverter;

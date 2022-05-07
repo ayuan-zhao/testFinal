@@ -28,7 +28,8 @@
         <Label fx:id="lblInfo" layoutX="224.0" styleClass="label-section" layoutY="14.0" prefHeight="166.0"
           prefWidth="807.0"/>
         <ChoiceBox fx:id="cboxType" layoutX="638.0" layoutY="749.0" prefWidth="150.0"/>
-        <Button fx:id="btnConvert" layoutX="824.0" layoutY="749.0" mnemonicParsing="false" text="Convert" onAction="#onConvert"/>
+        <Button fx:id="btnConvert" layoutX="824.0" layoutY="749.0" mnemonicParsing="false" text="Convert and Download"
+          onAction="#onConvert"/>
       </children>
     </AnchorPane>
   </children>

@@ -1,9 +1,12 @@
 package edu.northeast.imageConverter;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
@@ -20,6 +23,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javax.imageio.ImageIO;
 
 public class ImageController implements Initializable {
 
@@ -44,7 +48,7 @@ public class ImageController implements Initializable {
     final FileChooser fileChooser = new FileChooser();
 
     private Image uploadedImg;
-    private boolean hasPicture = false;
+    BufferedImage bufferedImage;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -61,11 +65,8 @@ public class ImageController implements Initializable {
     }
 
     private void initChoiceBox() {
-        cboxType.getItems().add("SVG");
-        cboxType.getItems().add("ICO");
         cboxType.getItems().add("JPG");
         cboxType.getItems().add("JPEG");
-        cboxType.getItems().add("GIP");
         cboxType.getItems().add("BMP");
         cboxType.getItems().add("PNG");
     }
@@ -101,12 +102,17 @@ public class ImageController implements Initializable {
         File selectedFile = fileChooser.showOpenDialog(new Stage());
         if (selectedFile != null) {
 
+            try {
+                bufferedImage = ImageIO.read(selectedFile);
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+
             final InputStream targetStream;
             try {
                 targetStream = new DataInputStream(new FileInputStream(selectedFile));
                 uploadedImg = new Image(targetStream);
                 setImage(uploadedImg, selectedFile.getPath());
-                hasPicture = true;
             } catch(FileNotFoundException fileNotFoundException) {
                 fileNotFoundException.printStackTrace();
             }
@@ -121,16 +127,42 @@ public class ImageController implements Initializable {
             return;
         }
 
-        if (!hasPicture) {
+        if (bufferedImage == null) {
             alertError("Please upload picture first");
             return;
         }
 
+        String extension = cboxType.getSelectionModel().getSelectedItem().toString();
 
+        final BufferedImage imageToWrite =
+            new BufferedImage(
+                bufferedImage.getWidth(),
+                bufferedImage.getHeight(),
+                BufferedImage.TYPE_INT_RGB);
+        imageToWrite.createGraphics().drawImage(bufferedImage, 0, 0, Color.WHITE, null);
+        File fileOld = fileChooser.showSaveDialog(new Stage());
+
+        if (fileOld != null) {
+            try {
+                File file = new File(fileOld.getPath() + "." + extension);
+                ImageIO.write(imageToWrite, extension, file);
+                alertInfo("File is downloaded successfully!");
+            } catch(IOException ex) {
+                System.out.println(ex.getMessage());
+                ex.printStackTrace();
+                alertError(ex.getMessage());
+            }
+        }
     }
 
     private void alertError(String msg) {
         Alert a = new Alert(AlertType.ERROR);
+        a.setContentText(msg);
+        a.show();
+    }
+
+    private void alertInfo(String msg) {
+        Alert a = new Alert(AlertType.INFORMATION);
         a.setContentText(msg);
         a.show();
     }
