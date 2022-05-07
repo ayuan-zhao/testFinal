@@ -7,8 +7,12 @@ Picture Management is using JavaFX for GUI, and provided the following functions
 4. Users can select the formats which they are going to convert to and save into local place.
 
 ## Table of Contents
+**[Class Diagram](#class-diagram)**<br>
 **[Steps of Converting Images](#steps-of-converting-images)**<br>
 **[Various Errors Testing](#various-errors-testing)**<br>
+
+## Class Diagram
+   <img src="images/class_diagram.png" alt="drawing" style="width:600px;"/>
 
 ## Steps of Converting Images
 1. Running `ImgManagementApplication.java`, the APP shows.
