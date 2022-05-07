@@ -34,6 +34,6 @@
     </AnchorPane>
   </children>
   <stylesheets>
-    <URL value="@calcu.css"></URL>
+    <URL value="@img-mang.css"></URL>
   </stylesheets>
 </VBox>

@@ -127,7 +127,7 @@
             <!-- Default configuration for running with: mvn clean javafx:run -->
             <id>default-cli</id>
             <configuration>
-              <mainClass>edu.northeast.imageConverter/edu.northeast.imageConverter.CalcuApplication</mainClass>
+              <mainClass>edu.northeast.imageConverter/edu.northeast.imageConverter.ImgManagementApplication</mainClass>
             </configuration>
           </execution>
         </executions>
