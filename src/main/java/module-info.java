@@ -14,4 +14,8 @@ module edu.northeast.imageConverter {
 
     opens edu.northeast.imageConverter to javafx.fxml;
     exports edu.northeast.imageConverter;
+    exports edu.northeast.imageConverter.convertor;
+    opens edu.northeast.imageConverter.convertor to javafx.fxml;
+    exports edu.northeast.imageConverter.models;
+    opens edu.northeast.imageConverter.models to javafx.fxml;
 }

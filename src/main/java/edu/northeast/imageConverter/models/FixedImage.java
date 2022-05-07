@@ -1,4 +1,4 @@
-package edu.northeast.imageConverter;
+package edu.northeast.imageConverter.models;
 
 import java.awt.image.BufferedImage;
 import java.io.InputStream;

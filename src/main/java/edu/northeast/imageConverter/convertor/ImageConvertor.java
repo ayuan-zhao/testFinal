@@ -1,5 +1,7 @@
-package edu.northeast.imageConverter;
+package edu.northeast.imageConverter.convertor;
 
+import edu.northeast.imageConverter.models.FixedImage;
+import edu.northeast.imageConverter.models.MessageManager;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -26,10 +28,10 @@ public class ImageConvertor implements IConvertor {
     }
 
     @Override
-    public void convert() {
+    public boolean convert() {
         if (this.originalExtension.equalsIgnoreCase(this.newExtension)) {
             mm.alertInfo("Please select different picture Type. Both type is " + this.originalExtension);
-            return;
+            return false;
         }
 
         BufferedImage bufferedImage = uploadedImg.getBufferedImage();
@@ -41,8 +43,10 @@ public class ImageConvertor implements IConvertor {
         if (fileOld != null) {
             fileToBeSaved = new File(fileOld.getPath() + "." + newExtension);
             fileSavedPath = fileToBeSaved.getPath();
+            return true;
         } else {
             mm.alertError("Please choose correct files!");
+            return false;
         }
     }
 
@@ -62,6 +66,7 @@ public class ImageConvertor implements IConvertor {
     /**
      * get file saved path.
      */
+    @Override
     public String getFileSavedPath() {
         return fileSavedPath;
     }

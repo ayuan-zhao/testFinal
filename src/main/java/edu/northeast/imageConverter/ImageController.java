@@ -1,9 +1,13 @@
 package edu.northeast.imageConverter;
 
-import static edu.northeast.imageConverter.FixedImage.MAX_DISPLAY_HEIGHT;
-import static edu.northeast.imageConverter.FixedImage.MAX_DISPLAY_WIDTH;
-import static edu.northeast.imageConverter.FixedImage.NO_IMAGE_AVAILABLE;
+import static edu.northeast.imageConverter.models.FixedImage.MAX_DISPLAY_HEIGHT;
+import static edu.northeast.imageConverter.models.FixedImage.MAX_DISPLAY_WIDTH;
+import static edu.northeast.imageConverter.models.FixedImage.NO_IMAGE_AVAILABLE;
 
+import edu.northeast.imageConverter.convertor.IConvertor;
+import edu.northeast.imageConverter.convertor.ImageConvertor;
+import edu.northeast.imageConverter.models.FixedImage;
+import edu.northeast.imageConverter.models.MessageManager;
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
 import java.io.File;
@@ -158,9 +162,8 @@ public class ImageController implements Initializable {
         String newExt = selectedItem.toString();
 
         // create a new converter and convert between types.
-        ImageConvertor converter = new ImageConvertor(uploadedImg, newExt);
-        converter.convert();
-        if (converter.saveImage()) {
+        IConvertor converter = new ImageConvertor(uploadedImg, newExt);
+        if (converter.convert() && converter.saveImage()) {
             displayMsg("File is saved in " + converter.getFileSavedPath(), true);
         }
     }
